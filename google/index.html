@@ -1153,10 +1153,25 @@
             document.addEventListener("click", function(event) {
                 const target = event.target.closest("[data-track]");
                 if (!target) return;
+                const isPhoneClick = target.getAttribute("href") && target.getAttribute("href").startsWith("tel:");
                 track("basement_cta_click", {
                     label: target.dataset.track,
                     page_name: "Basement Remodeling | Wolf Carpenters"
                 });
+                if (isPhoneClick && typeof window.gtag === "function") {
+                    window.gtag("event", "conversion", {
+                        send_to: "AW-16525015107/IFTRCPrGsMccEMPw3sc9",
+                        value: 1,
+                        currency: "USD",
+                        event_category: "lead",
+                        event_label: "basement_phone_click",
+                        page_name: "Basement Remodeling | Wolf Carpenters"
+                    });
+                    window.gtag("event", "phone_call_click", {
+                        phone_number: "+17813364594",
+                        page_location: window.location.href
+                    });
+                }
             });
 
             let scrollTracked = false;
