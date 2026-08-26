@@ -363,6 +363,10 @@
 
         .human-check.use-google .manual-human-check { display: none; }
         .human-check.use-manual .recaptcha-widget { display: none; min-height: 0; }
+        /* Se o reCAPTCHA do Google renderizou, ele sempre vence: mostra o widget
+           e esconde o checkbox manual, mesmo que use-manual tenha ficado marcado. */
+        .human-check.use-google.use-manual .recaptcha-widget { display: block; min-height: 78px; }
+        .human-check.use-google.use-manual .manual-human-check { display: none; }
 
         .submit-button {
             width: 100%;
@@ -1022,10 +1026,10 @@
                     try {
                         form.dataset.recaptchaWidgetId = String(window.grecaptcha.render(widget, { sitekey: recaptchaSiteKey }));
                         if (box) box.classList.add("use-google");
-                        return;
-                    } catch (err) {}
+                    } catch (err) {
+                        if (box) box.classList.add("use-manual");
+                    }
                 }
-                if (box) box.classList.add("use-manual");
             }
 
             function getRecaptchaToken(form) {
