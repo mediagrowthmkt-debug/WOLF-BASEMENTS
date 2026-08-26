@@ -722,25 +722,26 @@
         }
 
         @media (max-width: 720px) {
-            .container { width: min(100% - 28px, var(--container)); }
-            .nav-inner { min-height: 74px; }
-            .logo img { width: 136px; }
+            .container { width: min(100% - 34px, var(--container)); }
+            .nav-inner { min-height: 64px; }
+            .logo img { width: 104px; }
             .nav-meta span { display: none; }
             .nav-cta { padding: 10px 14px; min-height: 44px; font-size: 0.82rem; }
-            .hero { padding: 112px 0 42px; }
-            .hero-grid { gap: 22px; }
-            .hero-text { padding-top: 18px; }
-            .hero h1 { font-size: clamp(2rem, 10.5vw, 2.9rem); margin: 10px 0 12px; }
-            .hero-copy { font-size: 0.98rem; line-height: 1.48; }
+            .hero { padding: 134px 0 50px; }
+            .hero-grid { gap: 26px; }
+            .hero-text { padding-top: 6px; }
+            .hero .eyebrow { font-size: 0.72rem; line-height: 1.35; letter-spacing: 0.12em; }
+            .hero h1 { font-size: clamp(1.78rem, 8.2vw, 2.4rem); line-height: 1.04; margin: 16px 0 18px; overflow-wrap: break-word; }
+            .hero-copy { font-size: 0.98rem; line-height: 1.5; }
             .hero-badges {
                 grid-template-columns: 1fr;
-                gap: 8px;
-                margin: 18px 0 0;
+                gap: 10px;
+                margin: 24px 0 4px;
             }
             .badge {
-                min-height: 42px;
-                padding: 9px 12px;
-                font-size: 0.88rem;
+                min-height: 46px;
+                padding: 11px 14px;
+                font-size: 0.9rem;
             }
             .hero-text > .btn,
             .hero-proof {
@@ -759,6 +760,8 @@
                 grid-template-columns: 1fr;
             }
             .team-photo img { height: 300px; }
+            .ba-grid { grid-template-columns: 1fr; gap: 14px; }
+            .ba-item img { height: 240px; }
             .floating-call {
                 width: 52px;
                 height: 52px;
