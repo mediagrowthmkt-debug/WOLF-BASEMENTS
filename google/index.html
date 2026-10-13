@@ -27,8 +27,38 @@
             'ad_user_data': 'denied',
             'ad_personalization': 'denied',
             'analytics_storage': 'denied',
-            'wait_for_update': 500
+            'region': ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','GB','CH']
         });
+        gtag('consent', 'default', {
+            'ad_storage': 'granted',
+            'ad_user_data': 'granted',
+            'ad_personalization': 'granted',
+            'analytics_storage': 'granted'
+        });
+        (function() {
+            var keys = ['gclid', 'gbraid', 'wbraid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+            try {
+                var params = new URLSearchParams(window.location.search);
+                var found = {};
+                var any = false;
+                keys.forEach(function(k) { var v = params.get(k); if (v) { found[k] = v; any = true; } });
+                if (any) sessionStorage.setItem('wolf_attr', JSON.stringify(found));
+            } catch (e) {}
+            window.wolfAttribution = function() {
+                try { return JSON.parse(sessionStorage.getItem('wolf_attr') || '{}'); } catch (e) { return {}; }
+            };
+            window.wolfUserData = function(email, phone) {
+                var ud = {};
+                var em = String(email || '').trim().toLowerCase();
+                if (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(em)) ud.email = em;
+                var raw = String(phone || '').trim();
+                var dig = raw.replace(/\D/g, '');
+                if (raw.charAt(0) === '+' && dig.length >= 10) ud.phone_number = '+' + dig;
+                else if (dig.length === 10) ud.phone_number = '+1' + dig;
+                else if (dig.length === 11 && dig.charAt(0) === '1') ud.phone_number = '+' + dig;
+                return (ud.email || ud.phone_number) ? ud : null;
+            };
+        })();
     </script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16525015107"></script>
     <script>
@@ -172,6 +202,29 @@
             font-size: 0.88rem;
             font-weight: 700;
         }
+
+        .nav-call {
+            color: var(--wolf-yellow);
+            font-family: "Montserrat", sans-serif;
+            font-weight: 900;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .nav-call:hover { color: var(--wolf-white); }
+
+        .hero-call {
+            display: block;
+            width: fit-content;
+            margin-top: 14px;
+            color: var(--wolf-white);
+            font-family: "Montserrat", sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            text-decoration: none;
+        }
+
+        .hero-call strong { color: var(--wolf-yellow); }
 
         .hero {
             position: relative;
@@ -727,6 +780,9 @@
             .logo img { width: 104px; }
             .nav-meta span { display: none; }
             .nav-cta { padding: 10px 14px; min-height: 44px; font-size: 0.82rem; }
+            .nav-meta { gap: 12px; }
+            .nav-call { font-size: 0.8rem; }
+            .hero-call { margin: 18px 0 0; font-size: 1.02rem; }
             .hero { padding: 134px 0 50px; }
             .hero-grid { gap: 26px; }
             .hero-text { padding-top: 6px; }
@@ -775,7 +831,7 @@
         "@type": "HomeAndConstructionBusiness",
         "name": "Wolf Carpenters",
         "url": "https://wolfcarpenters.com/",
-        "telephone": "+19788197103",
+        "telephone": "+19784193358",
         "address": {
             "@type": "PostalAddress",
             "addressLocality": "Peabody",
@@ -795,6 +851,7 @@
             </a>
             <div class="nav-meta">
                 <span>Peabody, MA</span>
+                <a class="nav-call" href="tel:+19788197103" data-track="nav_phone_cta">Call (978) 819-7103</a>
                 <a class="btn nav-cta" href="#lead-form" data-track="nav_cta">Book A Free Site Visit</a>
             </div>
         </div>
@@ -815,6 +872,7 @@
                         <div class="badge">Moisture And Code Reviewed</div>
                     </div>
                     <a class="btn" href="#lead-form" data-track="hero_primary_cta">Book A Free Basement Site Visit</a>
+                    <a class="hero-call" href="tel:+19788197103" data-track="hero_phone_cta">Prefer to talk? <strong>Call (978) 819-7103</strong></a>
                     <div class="hero-proof" aria-label="Trust highlights">
                         <span>500+ MA Families Served</span>
                         <span>Local In-House Crew</span>
@@ -1196,8 +1254,13 @@
                     human_validation_method: humanMethod,
                     manual_human_check: humanMethod === "manual_checkbox_fallback",
                     form_elapsed_ms: elapsed,
-                    honeypot: ""
+                    honeypot: "",
+                    project_goal: data.get("project_goal") || ""
                 };
+                const attribution = window.wolfAttribution ? window.wolfAttribution() : {};
+                ["gclid", "gbraid", "wbraid", "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].forEach(function(k) {
+                    payload[k] = attribution[k] || "";
+                });
 
                 try {
                     const response = await fetch(webhookUrl, {
@@ -1207,12 +1270,20 @@
                     });
                     if (!response.ok) throw new Error("HTTP " + response.status);
                     if (typeof window.fbq === "function") window.fbq("track", "Lead", { content_name: "Basement Remodeling", content_category: "Basement Remodeling" });
+                    let redirected = false;
+                    const goThankYou = function() {
+                        if (redirected) return;
+                        redirected = true;
+                        window.location.href = "thank-you.html";
+                    };
                     if (typeof window.gtag === "function") {
-                        window.gtag("consent", "update", {
-                            ad_storage: "granted",
-                            ad_user_data: "granted",
-                            ad_personalization: "granted",
-                            analytics_storage: "granted"
+                        const userData = window.wolfUserData ? window.wolfUserData(payload.email, payload.phone) : null;
+                        if (userData) window.gtag("set", "user_data", userData);
+                        window.gtag("event", "basement_lead_submit", {
+                            form_name: form.dataset.formName || "basement_google_form",
+                            lead_source: platform,
+                            project_goal: payload.project_goal,
+                            page_location: window.location.href
                         });
                         window.gtag("event", "conversion", {
                             send_to: "AW-16525015107/_FGsCODO8OkbEMPw3sc9",
@@ -1221,15 +1292,11 @@
                             event_category: "lead",
                             event_label: "basement_lead_submit",
                             page_name: "Basement Remodeling | Wolf Carpenters",
-                            event_callback: function() {}
-                        });
-                        window.gtag("event", "basement_lead_submit", {
-                            form_name: form.dataset.formName || "basement_google_form",
-                            lead_source: platform,
-                            page_location: window.location.href
+                            event_callback: goThankYou,
+                            event_timeout: 1500
                         });
                     }
-                    window.location.href = "thank-you.html";
+                    window.setTimeout(goThankYou, 1500);
                 } catch (err) {
                     console.error("Webhook error:", err);
                     button.disabled = false;
